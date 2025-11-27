@@ -4,6 +4,7 @@ struct ContentView: View {
     @StateObject private var scanner = FileScanner()
     @State private var selectedFolder: URL?
     @State private var showHelp = false
+    @State private var selectedFiles: Set<UUID> = []
     
     var body: some View {
         VStack(spacing: 0) {
@@ -69,32 +70,57 @@ struct ContentView: View {
                         ProgressView("Scanning...")
                             .padding()
                     } else if !scanner.foundFiles.isEmpty {
-                        List(scanner.foundFiles) { file in
-                            HStack {
-                                Image(systemName: "doc.fill")
-                                    .foregroundColor(.secondary)
-                                Text(file.name)
-                                Spacer()
-                                Text(ByteCountFormatter.string(fromByteCount: file.size, countStyle: .file))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                        List {
+                            ForEach(scanner.foundFiles) { file in
+                                HStack {
+                                    Toggle("", isOn: Binding(
+                                        get: { selectedFiles.contains(file.id) },
+                                        set: { isSelected in
+                                            if isSelected {
+                                                selectedFiles.insert(file.id)
+                                            } else {
+                                                selectedFiles.remove(file.id)
+                                            }
+                                        }
+                                    ))
+                                    .toggleStyle(.checkbox)
+                                    
+                                    Image(systemName: "doc.fill")
+                                        .foregroundColor(.secondary)
+                                    Text(file.name)
+                                    Spacer()
+                                    Text(ByteCountFormatter.string(fromByteCount: file.size, countStyle: .file))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .listStyle(.inset)
                         .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.2)))
                         
                         Button(action: {
-                            scanner.cleanFiles()
+                            let filesToDelete = scanner.foundFiles.filter { selectedFiles.contains($0.id) }
+                            let totalBytes = filesToDelete.reduce(0) { $0 + $1.size }
+                            
+                            scanner.cleanFiles(toDelete: filesToDelete)
+                            HistoryManager.shared.addCleaned(files: filesToDelete.count, bytes: totalBytes)
+                            
+                            selectedFiles = []
+                            
+                            // Sound & Haptics
+                            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+                            NSSound(named: "Glass")?.play()
                         }) {
-                            Text("Clean \(scanner.foundFiles.count) Files")
+                            Text("Clean \(selectedFiles.count) Selected Files")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.red)
+                                .background(selectedFiles.isEmpty ? Color.gray : Color.red)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                         }
                         .buttonStyle(.plain)
+                        .disabled(selectedFiles.isEmpty)
                         
                     } else {
                         if scanner.statusMessage.contains("Cleaned") {
@@ -105,6 +131,13 @@ struct ContentView: View {
                                     .padding()
                                 Text(scanner.statusMessage)
                                     .font(.headline)
+                                
+                                Button("Scan Again") {
+                                    if let folder = selectedFolder {
+                                        scanner.scan(directory: folder)
+                                    }
+                                }
+                                .padding(.top)
                             }
                             .frame(maxHeight: .infinity)
                         } else {
@@ -131,6 +164,10 @@ struct ContentView: View {
                         Text("Select a USB Drive to Clean")
                             .font(.title2)
                             .foregroundColor(.secondary)
+                        
+                        Toggle("Deep Scan (Include Subfolders)", isOn: $scanner.deepScan)
+                            .toggleStyle(.checkbox)
+                            .padding(.bottom, 10)
                         
                         Button(action: selectFolder) {
                             Text("Select Disk")
@@ -159,6 +196,9 @@ struct ContentView: View {
             .background(Color(NSColor.windowBackgroundColor))
         }
         .frame(minWidth: 500, minHeight: 400)
+        .onChange(of: scanner.foundFiles) { files in
+            selectedFiles = Set(files.map { $0.id })
+        }
     }
     
     func selectFolder() {
@@ -174,3 +214,5 @@ struct ContentView: View {
         }
     }
 }
+    
+

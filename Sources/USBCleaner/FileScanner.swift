@@ -18,35 +18,46 @@ class FileScanner: ObservableObject {
     @Published var foundFiles: [ScannedFile] = []
     @Published var isScanning = false
     @Published var statusMessage = "Ready to scan"
+    @Published var deepScan = false
+    
+    private let windowsJunk = ["Thumbs.db", "Desktop.ini", "$RECYCLE.BIN", "System Volume Information"]
     
     func scan(directory: URL) {
         isScanning = true
         statusMessage = "Scanning \(directory.lastPathComponent)..."
         foundFiles = []
         
+        let performDeepScan = deepScan
+        
         DispatchQueue.global(qos: .userInitiated).async {
             let fileManager = FileManager.default
             var files: [ScannedFile] = []
             
-            // Re-create enumerator without skipping hidden files
-            if let enumerator = fileManager.enumerator(at: directory, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey], options: [], errorHandler: nil) {
+            let options: FileManager.DirectoryEnumerationOptions = performDeepScan ? [] : [.skipsSubdirectoryDescendants]
+            
+            // Re-create enumerator without skipping hidden files (unless deep scan is off, then we skip subdirs)
+            if let enumerator = fileManager.enumerator(at: directory, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey], options: options, errorHandler: nil) {
                 
                 for case let fileURL as URL in enumerator {
                     let filename = fileURL.lastPathComponent
                     
-                    // Check if it starts with '.' and is not just "." or ".." (though enumerator usually handles . and ..)
-                    // Also ignore .Trash or system folders if we are scanning a root
-                    if filename.hasPrefix(".") && filename != "." && filename != ".." {
-                        
-                        // Optional: Filter out specific system directories if needed, but for USB cleaner, we usually want to clean .DS_Store, ._*, etc.
+                    // Check for specific unwanted files
+                    let isDSStore = filename == ".DS_Store"
+                    let isResourceFork = filename.hasPrefix("._")
+                    let isWindowsJunk = self.windowsJunk.contains(where: { filename.caseInsensitiveCompare($0) == .orderedSame })
+                    
+                    if isDSStore || isResourceFork || isWindowsJunk {
                         
                         do {
                             let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
-                            if let isRegularFile = resourceValues.isRegularFile, isRegularFile {
-                                let size = resourceValues.fileSize ?? 0
-                                let scannedFile = ScannedFile(url: fileURL, size: Int64(size))
-                                files.append(scannedFile)
-                            }
+                            // We want to delete folders like $RECYCLE.BIN too, so we don't strictly check for isRegularFile if it's a known junk folder
+                            // But for simplicity in this version, let's treat everything as a file/item to be removed.
+                            // However, FileScanner struct expects size.
+                            
+                            let size = resourceValues.fileSize ?? 0
+                            let scannedFile = ScannedFile(url: fileURL, size: Int64(size))
+                            files.append(scannedFile)
+                            
                         } catch {
                             print("Error reading attributes for \(fileURL): \(error)")
                         }
@@ -58,15 +69,17 @@ class FileScanner: ObservableObject {
                 self.foundFiles = files
                 self.isScanning = false
                 self.statusMessage = "Found \(files.count) files."
+                // Note: ContentView will need to handle selecting these files, or we can't easily do it here without binding.
+                // Alternatively, we can make selectedFiles part of FileScanner or handle it in ContentView's onChange.
             }
         }
     }
     
-    func cleanFiles() {
+    func cleanFiles(toDelete: [ScannedFile]) {
         let fileManager = FileManager.default
         var deletedCount = 0
         
-        for file in foundFiles {
+        for file in toDelete {
             do {
                 try fileManager.removeItem(at: file.url)
                 deletedCount += 1
@@ -75,7 +88,9 @@ class FileScanner: ObservableObject {
             }
         }
         
-        foundFiles = []
+        // Remove deleted files from the found list
+        foundFiles.removeAll { file in toDelete.contains(file) }
+        
         statusMessage = "Cleaned \(deletedCount) files."
     }
 }

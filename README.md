@@ -7,10 +7,13 @@ USBCleaner is a lightweight macOS utility designed to help you keep your USB dri
 ## Features
 
 - **Scan USB Drives**: Automatically detects and scans selected folders or drives.
-- **Identify Clutter**: Finds hidden files and system artifacts that can clutter up non-Mac file systems.
-- **One-Click Cleaning**: Quickly delete all identified unwanted files.
+- **Deep Scan**: Recursively scan subfolders to find hidden files everywhere.
+- **Identify Clutter**: Finds hidden macOS files (`.DS_Store`, `._*`) and Windows junk (`Thumbs.db`, `$RECYCLE.BIN`).
+- **Preview & Select**: Review found files and choose which ones to keep or delete.
+- **Cleaning History**: Track your lifetime cleaning stats (files and space recovered).
+- **One-Click Cleaning**: Quickly delete all identified unwanted files with sound and haptic feedback.
 - **Universal Build**: Runs natively on both Apple Silicon and Intel Macs.
-- **Simple Interface**: Clean and easy-to-use SwiftUI interface.
+- **Simple Interface**: Clean and easy-to-use SwiftUI interface with Dark Mode support.
 
 ## Requirements
 
@@ -35,21 +38,23 @@ To build the application from source, follow these steps:
     ```
 
 3. **Package the application:**
-    Create the `.app` bundle and apply an ad-hoc signature.
+    Create the `.app` bundle and a `.dmg` installer.
 
     ```bash
     ./package_app.sh
+    ./create_dmg.sh
     ```
 
-    The `USBCleaner.app` will be created in the current directory.
+    The `USBCleaner.dmg` will be created in the current directory.
 
 ## Usage
 
 1. Open `USBCleaner.app`.
 2. Click **Select Disk** to choose the USB drive or folder you want to scan.
 3. The app will list all found hidden/unwanted files.
-4. Click **Clean [N] Files** to delete them permanently.
-5. Once finished, you can eject your drive safely.
+4. (Optional) Uncheck any files you wish to keep.
+5. Click **Clean [N] Files** to delete them permanently.
+6. Once finished, you can eject your drive safely.
 
 ## Note
 
