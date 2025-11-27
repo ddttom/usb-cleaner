@@ -1,0 +1,12 @@
+Keep your USB drives clean and clutter-free with USBCleaner.
+
+USBCleaner is a simple yet powerful utility designed to scan your external drives for hidden system files and other unwanted artifacts that macOS leaves behind. These files (like .DS_Store, ._*, and .Trashes) can be annoying when you use your drive on other devices like TVs, car stereos, or Windows PCs.
+
+Key Features:
+- **Smart Scanning**: Automatically detects connected USB drives and scans them for hidden clutter.
+- **One-Click Cleaning**: Remove all identified junk files instantly with a single click.
+- **Detailed Results**: See exactly what files are taking up space before you delete them.
+- **Universal Support**: Runs natively on both Apple Silicon (M1/M2/M3) and Intel-based Macs.
+- **Safe & Secure**: Only targets specific system artifacts, keeping your personal data safe.
+
+Perfect for photographers, DJs, and anyone who shares files between different operating systems. Download USBCleaner today and keep your drives spotless!

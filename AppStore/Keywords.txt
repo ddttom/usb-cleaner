@@ -1,0 +1,1 @@
+usb,cleaner,disk,drive,remove,delete,hidden,files,ds_store,junk,utility,tool,macos,external,storage
