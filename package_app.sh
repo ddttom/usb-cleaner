@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APP_NAME="USBCleaner"
-EXECUTABLE_PATH=".build/release/USBCleaner"
+EXECUTABLE_PATH=".build/apple/Products/Release/USBCleaner"
 APP_BUNDLE="$APP_NAME.app"
 
 # Check if executable exists
