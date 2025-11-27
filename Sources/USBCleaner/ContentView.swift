@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var scanner = FileScanner()
     @State private var selectedFolder: URL?
+    @State private var showHelp = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -12,6 +13,21 @@ struct ContentView: View {
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                 Spacer()
+                
+                Button(action: {
+                    showHelp = true
+                }) {
+                    Image(systemName: "questionmark.circle")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Help & Support")
+            }
+            .padding()
+            .background(Color(NSColor.windowBackgroundColor))
+            .sheet(isPresented: $showHelp) {
+                HelpView()
             }
             .padding()
             .background(Color(NSColor.windowBackgroundColor))
