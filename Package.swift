@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "USBCleaner",
     platforms: [
-        .macOS(.v11)
+        .macOS(.v13)
     ],
     products: [
         .executable(

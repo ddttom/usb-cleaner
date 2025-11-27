@@ -14,26 +14,29 @@ USBCleaner is a lightweight macOS utility designed to help you keep your USB dri
 
 ## Requirements
 
-- macOS 11.0 (Big Sur) or later.
+- macOS 13.0 (Ventura) or later.
 
 ## Installation & Build
 
 To build the application from source, follow these steps:
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
+
     ```bash
     git clone https://github.com/ddttom/usb-cleaner.git
     cd usb-cleaner
     ```
 
-2.  **Build the project:**
+2. **Build the project:**
     Run the build script to compile the application for both Apple Silicon and Intel architectures.
+
     ```bash
     ./build.sh
     ```
 
-3.  **Package the application:**
-    Create the `.app` bundle.
+3. **Package the application:**
+    Create the `.app` bundle and apply an ad-hoc signature.
+
     ```bash
     ./package_app.sh
     ```
@@ -42,15 +45,15 @@ To build the application from source, follow these steps:
 
 ## Usage
 
-1.  Open `USBCleaner.app`.
-2.  Click **Select Disk** to choose the USB drive or folder you want to scan.
-3.  The app will list all found hidden/unwanted files.
-4.  Click **Clean [N] Files** to delete them permanently.
-5.  Once finished, you can eject your drive safely.
+1. Open `USBCleaner.app`.
+2. Click **Select Disk** to choose the USB drive or folder you want to scan.
+3. The app will list all found hidden/unwanted files.
+4. Click **Clean [N] Files** to delete them permanently.
+5. Once finished, you can eject your drive safely.
 
 ## Note
 
-Since this application is not signed with an Apple Developer ID, you may need to right-click the app and select **Open** to bypass macOS security warnings on the first run.
+Since this application is ad-hoc signed (self-signed) and not notarized by Apple, you may need to right-click the app and select **Open** to bypass macOS security warnings on the first run, especially if you move the app to another computer.
 
 ## Privacy & Support
 

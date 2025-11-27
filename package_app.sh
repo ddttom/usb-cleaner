@@ -37,12 +37,15 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<EOF
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>LSMinimumSystemVersion</key>
-    <string>11.0</string>
+    <string>13.0</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
 </plist>
 EOF
 
+echo "Signing app..."
+codesign --force --deep --sign - "$APP_BUNDLE"
+
 echo "App bundle created at $APP_BUNDLE"
-echo "Note: Since this app is not signed with an Apple Developer ID, your friends may need to right-click and select 'Open' to bypass macOS security warnings."
+echo "Note: Since this app is ad-hoc signed, your friends may need to right-click and select 'Open' to bypass macOS security warnings."
